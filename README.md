@@ -1,12 +1,12 @@
-Repositorio para la asignatura de Ingenieria de Software II Semestre 2014
-=========================================================================
+Repositorio para la asignatura de Ingeniería de Software II Semestre 2014 UTEM
+==============================================================================
 
-Profesor de Catedra <br>
+Profesor de Cátedra <br>
 
 + Sebastián Salazar Molina [https://github.com/sebasalazar]
 
 Integrantes
 
-+ Daniel Gutierrez [https://github.com/Lanceconan]
++ Daniel Gutiérrez [https://github.com/Lanceconan]
 
-+ Juan Pablo Sepulveda [https://github.com/derriba]
++ Juan Pablo Sepúlveda [https://github.com/derriba]
