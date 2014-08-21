@@ -9,4 +9,6 @@ Integrantes
 
 + Daniel Gutiérrez [https://github.com/Lanceconan]
 
-+ Juan Pablo Sepúlveda [https://github.com/derriba]
++ Ernesto Rojas [https://github.com/]
+
++ Daniel Leiva [https://github.com/droguier]
