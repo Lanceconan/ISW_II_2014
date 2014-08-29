@@ -12,3 +12,8 @@ Integrantes
 + Ernesto Rojas [https://github.com/erojasd]
 
 + Daniel Leiva [https://github.com/droguier]
+
+Tarea Computacional 00
+======================
+
+Descripcion: Programar en lenguaje C/C++, una aplicación que genere un archivo .jpg con las ventas entre una fecha ingresada por parametro a la aplicación distribuidas por tienda.
