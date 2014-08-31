@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
                                     * 3: Replay
                                     */
                                     Saca_Comillas(ventas[i].nombre_empresa);
-                                        if (strcmp("CencoSux", NuevaPalabra) == 0) SumaMonto[0] = SumaMonto [0] + ventas[i].monto;
+                                         if (strcmp("CencoSux", NuevaPalabra) == 0) SumaMonto[0] = SumaMonto [0] + ventas[i].monto;
                                     else if (strcmp("Falaferia", NuevaPalabra) == 0) SumaMonto[1] = SumaMonto [1] + ventas[i].monto;
                                     else if (strcmp("Porahi", NuevaPalabra) == 0) SumaMonto[2] = SumaMonto [2] + ventas[i].monto;
                                     else if (strcmp("Replay", NuevaPalabra) == 0) SumaMonto[3] = SumaMonto [3] + ventas[i].monto;
@@ -176,12 +176,13 @@ int main(int argc, char *argv[])
                                 }
                             }
                         }
-                        cout<<"LA CANTIDAD DE REGISTROS RECONOCIDOS EN EL ARCHIVO ES: "<<lineas_totales<<endl;
+                        //cout<<"LA CANTIDAD DE REGISTROS RECONOCIDOS EN EL ARCHIVO ES: "<<lineas_totales<<endl;
                         cout<<" \nLAS VENTAS ENTRE LAS FECHAS INGRESADAS SE DEFINE"<<endl;
                         cout<<"\tPara la empresa CencoSux\t: $ "<<SumaMonto[0]<<endl;
                         cout<<"\tPara la empresa Falaferia\t: $ "<<SumaMonto[1]<<endl;
                         cout<<"\tPara la empresa Porahi\t\t: $ "<<SumaMonto[2]<<endl;
                         cout<<"\tPara la empresa Replay\t\t: $ "<<SumaMonto[3]<<endl;
+                        cout<<""<<endl;
                        }
                        break;
 
