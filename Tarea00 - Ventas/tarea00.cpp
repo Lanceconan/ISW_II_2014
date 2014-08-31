@@ -3,6 +3,15 @@
 #include <fstream>
 #include <ctime>
 #include <string.h>
+#include <gd.h>
+#include <gdfonts.h>
+
+#define IMG_WIDTH 600
+#define IMG_HEIGHT 180
+#define BORDE_ANCHO 580
+#define BORDE_ALTO 150
+
+/*Para compilar este archivo compilese con el siguiente código: g++ tarea00.cpp -o test -I/usr/include/ -I/usr/include -lgd */
 
 using namespace std;
 
@@ -55,9 +64,9 @@ void crear_registro(registro_venta *ventas,char *direccion){
               contador++;
          };
          file_venta.close();
-         cout<<"\nLectura de archivo exitosa"<<endl;
+         cout<<"\nLectura de archivo *.csv exitosa"<<endl;
     }else
-         cout<<"\nError al abrir el archivo: "<<direccion<<" . "<<endl;
+         cout<<"\nError al abrir el archivo *.csv: "<<direccion<<" . "<<endl;
 }
 
 //FUNCION PARA PODER OBTENER LA CANTIDAD MAXIMA DE REGISTROS DEL ARCHIVO CSV
@@ -86,6 +95,7 @@ int main(int argc, char *argv[])
     registro_venta *ventas;    			// estructura de venta creada al inicio
     int lineas_totales=0;      			// entero que permite crear el largo total de registro de ventas
     int i=0;                   			// contador
+
     long long int SumaMonto [4];
     /*Array para guardar montos por tienda
      * 0: Cencosux
@@ -93,6 +103,15 @@ int main(int argc, char *argv[])
      * 2: Porahi
      * 3: Replay
      */
+
+    /*Variables usadas para mostrar datos*/
+    gdImagePtr imagen;
+    FILE *archivo;
+    gdFontPtr fuente = gdFontGetSmall();
+    imagen = gdImageCreateTrueColor(IMG_WIDTH, IMG_HEIGHT);
+    int blanco, negro, color;
+    char titulo[513];
+
     if((argc==2)||(argc==5)){
 
       if((argv[1][0]!='-')){
@@ -180,12 +199,69 @@ int main(int argc, char *argv[])
                             }
                         }
                         //cout<<"LA CANTIDAD DE REGISTROS RECONOCIDOS EN EL ARCHIVO ES: "<<lineas_totales<<endl;
-                        cout<<" \nLAS VENTAS ENTRE LAS FECHAS INGRESADAS SE DEFINE"<<endl;
-                        cout<<"\tPara la empresa CencoSux\t: $ "<<SumaMonto[0]<<endl;
-                        cout<<"\tPara la empresa Falaferia\t: $ "<<SumaMonto[1]<<endl;
-                        cout<<"\tPara la empresa Porahi\t\t: $ "<<SumaMonto[2]<<endl;
-                        cout<<"\tPara la empresa Replay\t\t: $ "<<SumaMonto[3]<<endl;
+                        cout<<" \nLAS VENTAS ENTRE LAS FECHAS INGRESADAS SE DEFINE EN 'grafico_venta.jpg'"<<endl;
+                        cout<<"EN LA CARPETA DE EJECUCION DEL PROGRAMA"<<endl;
+                        //cout<<"\tPara la empresa CencoSux\t: $ "<<SumaMonto[0]<<endl;
+                        //cout<<"\tPara la empresa Falaferia\t: $ "<<SumaMonto[1]<<endl;
+                        //cout<<"\tPara la empresa Porahi\t\t: $ "<<SumaMonto[2]<<endl;
+                        //cout<<"\tPara la empresa Replay\t\t: $ "<<SumaMonto[3]<<endl;
                         cout<<""<<endl;
+
+                       /*Seccion para generar jpg*/
+
+                       blanco = gdImageColorAllocate(imagen, 255, 255, 255);
+                       negro = gdImageColorAllocate(imagen, 0, 0, 0);
+
+                        // Pintamos el fondo Blanco
+                        gdImageFill(imagen, 0, 0, blanco);
+
+                        // Se imprime el titulo
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 512, "LAS VENTAS ENTRE LAS FECHAS INGRESADAS  [%s] a [%s] SE DEFINE", fecha_i, fecha_f);
+                        gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.15, 10, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
+                        // Para la empresa CencoSux
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 512, "Para la empresa CencoSux: $ %lld", SumaMonto[0]);
+                        gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.1, 50, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
+                        // Para la empresa Falaferia
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 512, "Para la empresa Falaferia: $ %lld", SumaMonto[1]);
+                        gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.1, 70, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
+                        // Para la empresa Porahi
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 512, "Para la empresa Porahi: $ %lld", SumaMonto[2]);
+                        gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.1, 90, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
+                        // Para la empresa Replay
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 512, "Para la empresa Replay: $ %lld", SumaMonto[3]);
+                        gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.1, 110, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
+                        // Se enmarcan los valores en un rectangulo
+                        gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, negro);
+                        gdImageLine(imagen, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
+                        gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), negro);
+                        gdImageLine(imagen, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
+
+                       // Se guarda la imagen en un archivo
+                        archivo = fopen("grafico_ventas.jpg", "wb");
+                        if (archivo != NULL) {
+                            gdImageJpeg(imagen, archivo, 100);
+                            fclose(archivo);
+                        }
+                        else cout<<"\n\n\t No se pudo crear el archivo"<<endl;
+                        gdImageDestroy(imagen);
+
+                       /*Final de Seccion para generar jpg*/
+
                        }
                        break;
 
