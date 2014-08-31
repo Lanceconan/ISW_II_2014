@@ -8,6 +8,7 @@ using namespace std;
 
 char NuevaPalabra [15];
 
+
 //CREACION DE LA ESTRUCTURA DE REGISTRO PARA CADA VENTA
 struct registro_venta{
        char nombre_empresa[50];
@@ -18,8 +19,9 @@ struct registro_venta{
 //PROCEDIMIENTO PARA MOSTRAR LOS INTEGRANTES DEL GRUPO
 void integrantes(){
      printf("\nIntegrantes:\n\nGutierrez, Daniel\nLeiva, Daniel\nRojas, Ernesto\n\n");
-     printf("Fecha de compilacion: ");
-     puts(__DATE__); //Fecha de compilacion.
+     printf("Version: 1.3\n");
+     printf("Fecha de compilacion: %s - %s\n\n ", __DATE__, __TIME__);//Fecha de compilacion.
+
 }
 
 //ELIMINAR COMILLA DE LA EMPRESA DEL REGISTRO ANALIZADO
@@ -144,9 +146,10 @@ int main(int argc, char *argv[])
                        //verificamos el archivo y solicitamos la creacion del registro de las ventas
                        lineas_totales=contar_lineas(captura_arg);
 
-                       if(lineas_totales==0)
+                       if(lineas_totales==0){
+                            cout<<"\nArchivo No Existente o Vacio\n\n"<<endl;
                             return EXIT_SUCCESS;
-                       else{
+                       }else{
 
                             ventas = new registro_venta[lineas_totales];
                             crear_registro(ventas,captura_arg);
