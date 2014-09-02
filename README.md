@@ -18,9 +18,14 @@ Tarea Computacional 00
 
 Descripcion: Programar en lenguaje C/C++, una aplicación que genere un archivo .jpg con las ventas entre una fecha ingresada por parametro a la aplicación distribuidas por tienda.
 
-PARA COMPILARLO, EN LINUX TECLEAR EL SIGUIENTE COMANDO:<br>
+Para compilarlo en un entorno linux:<br>
 g++ tarea00.cpp -o test -I/usr/include/ -I/usr/include -lgd<br>
 <br>
-PARA PROBAR SU EJECUCION:<br>
+ejecutar con el siguiente comando:<br>
 ./test -v<br>
 ./test -g 2013-01-01 2013-01-10 arch.csv<br>
+
+Tarea de Ayudantía 01
+=====================
+
+Caracteristicas de 6 principales frameworks de PHP, redactado en Latex.
