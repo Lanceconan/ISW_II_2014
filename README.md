@@ -29,3 +29,14 @@ Tarea de Ayudantía 01
 =====================
 
 Caracteristicas de 6 principales frameworks de PHP, redactado en Latex.
+
+Tarea Computacional 01
+======================
+
+Descripcion: Programar en lenguaje C/C++, una aplicación que .... <br>
+
+Para compilarlo en un entorno linux:<br>
+g++ tarea01.cpp -o test -I/usr/include/postgresql -I/usr/include -lpq <br>
+<br>
+ejecutar con el siguiente comando:<br>
+./test -v<br>
