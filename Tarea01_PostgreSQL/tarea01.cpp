@@ -22,10 +22,7 @@
 /*compilar este archivo con el siguiente código:
 g++ tarea01.cpp -o test -I/usr/include/postgresql -I/usr/include -lpq -lgd  */
 
-
-
 using namespace std;
-
 
 /*Variables Globales*/
 char *fecha_i,*fecha_f;  	        //atributos de respaldo de argumentos para la direccion y fechas.
@@ -128,14 +125,45 @@ if((argc==2)||(argc==4))
          case 'g':     //ingresando en opcion "g", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
 
+            /*Conexion con la base de datos*/
+            cnn = PQsetdbLogin(host,port,NULL,NULL,dataBase,user,passwd);
+
+                if (PQstatus(cnn) != CONNECTION_BAD) {
+                result = PQexec(cnn, "Select ip From isw.accesos where tamano = 0");
+
+                    if (result != NULL)
+                    {
+                        int tuplas = PQntuples(result);
+                        int campos = PQnfields(result);
+                        cout << endl << "Las direcciones IP de acceso con tamanio igual a 0 son:" << endl;
+
+                        for (i=0; i<tuplas; i++)
+                        {
+                            for (int j=0; j<campos; j++)
+                            {
+                                cout << PQgetvalue(result,i,j);
+                                cout<<": ";
+                                getchar();
+                            }
+                        cout << endl;
+                        }
+                    }
+                }
+
+                else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
+
+            PQfinish(cnn);
+            /*FIn de la conexion con la base de datos*/
+
          break;
 
-         case 't':     //ingresando en opcion "g", respaldamos los argumentos.
+         case 't':     //ingresando en opcion "t", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
 
+
          break;
 
-         case 'a':     //ingresando en opcion "g", respaldamos los argumentos.
+         case 'a':     //ingresando en opcion "a", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
 
          break;
