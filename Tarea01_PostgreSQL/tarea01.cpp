@@ -1,4 +1,5 @@
-/*Bibliotecas utilizadas*/
+/*Bibliotecas utilizadas*/ // Las fechas en la BD  van desde el 16/03 hasta 23/09 del 2014 todas
+
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
@@ -11,7 +12,9 @@
 #include <gd.h>
 #include <gdfonts.h>
 
+
 /*Constantes*/
+#define LargoConsulta 200
 #define _TIME_
 #define N 15
 #define IMG_WIDTH 600
@@ -25,21 +28,19 @@ g++ tarea01.cpp -o test -I/usr/include/postgresql -I/usr/include -lpq -lgd  */
 using namespace std;
 
 /*Variables Globales*/
+char Consulta[LargoConsulta];       //Cadena que permite la consulta
 char *fecha_i,*fecha_f;  	        //atributos de respaldo de argumentos para la direccion y fechas.
 struct tm fecha_desde;  			// estructura para trabajar la fecha de inicio
 struct tm fecha_hasta;  			// estructura para trabajar la fecha de termino
 
-/*Variables Globales inherentes  a la conexión con la base de datos*/
-PGconn *cnn = NULL;
-PGresult *result = NULL, *re2=NULL;
-const char *host = "146.83.181.4";
-const char *port = "6432";
-const char *schema = "isw";
-const char *dataBase = "iswdb";
-const char *user = "estisw";
-const char *passwd = "estisw";
+//FUNCION QUE PERMITE IR LIBERANDO LA VARIABLE DE CONSULTA PARA EVITAR ERRORES
+void LimpiarConsulta(void)
+{
+    for(int i = 0; i < LargoConsulta; i++ )
+        Consulta[i] = '\0';
+}
 
-//PROCEDIMIENTO PARA MOSTRAR LOS INTEGRANTES DEL GRUPO
+//FUNCION PARA MOSTRAR LOS INTEGRANTES DEL GRUPO
 void integrantes(){
      printf("\nIntegrantes:\n\nGutierrez, Daniel\nLeiva, Daniel\nRojas, Ernesto\n\n");
      printf("Version: 1.3\n");
@@ -110,6 +111,26 @@ int main(int argc, char *argv[])
 char chartoint[5];      			// char para respaldo y apoyo para traspasar las fechas a digitos individuales
 int lineas_totales=0;      			// entero que permite crear el largo total de registro de ventas
 int i=0;                   			// contador
+ofstream archivoCSV;                // variable tipo archivo para generar CSV con peticiones
+int CantidadxMes [12];              // Array que almacena la cantidad de peticiones por mes
+
+/*Variables inherentes  a la conexión con la base de datos*/
+PGconn *conexion = NULL;
+PGresult *resultado_SQL = NULL;
+const char *servidor = "146.83.181.4";
+const char *puerto = "6432";
+const char *esquema = "isw";
+const char *baseDato = "iswdb";
+const char *usuario = "estisw";
+const char *contrasena = "estisw";
+
+/*Variables usadas para mostrar datos en JPEG*/
+gdImagePtr imagen;
+FILE *archivo;
+gdFontPtr fuente = gdFontGetSmall();
+imagen = gdImageCreateTrueColor(IMG_WIDTH, IMG_HEIGHT);
+int blanco, negro;
+char titulo[513];
 
 /*Validación de argumentos de entrada con opciones -g -t -a -v*/
 if((argc==2)||(argc==4))
@@ -124,52 +145,101 @@ if((argc==2)||(argc==4))
 
          case 'g':     //ingresando en opcion "g", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
+            LimpiarConsulta();
+
+            strcpy(Consulta,"Select fecha,estado From isw.accesos "); //where tamano = 0
 
             /*Conexion con la base de datos*/
-            cnn = PQsetdbLogin(host,port,NULL,NULL,dataBase,user,passwd);
+            conexion = PQsetdbLogin(servidor,puerto,NULL,NULL,baseDato,usuario,contrasena);
 
-                if (PQstatus(cnn) != CONNECTION_BAD) {
-                result = PQexec(cnn, "Select ip From isw.accesos where tamano = 0");
+                if (PQstatus(conexion) != CONNECTION_BAD) {
+                resultado_SQL = PQexec(conexion, Consulta);
 
-                    if (result != NULL)
+                    if (resultado_SQL != NULL)
                     {
-                        int tuplas = PQntuples(result);
-                        int campos = PQnfields(result);
+                        int tuplas = PQntuples(resultado_SQL);
+                        int campos = PQnfields(resultado_SQL);
                         cout << endl << "Las direcciones IP de acceso con tamanio igual a 0 son:" << endl;
 
-                        for (i=0; i<tuplas; i++)
+                        for (i=0; i < tuplas; i++)
                         {
-                            for (int j=0; j<campos; j++)
+                            for (int j=0; j < campos; j++)
                             {
-                                cout << PQgetvalue(result,i,j);
+                                cout << PQgetvalue(resultado_SQL,i,j);
                                 cout<<": ";
-                                getchar();
+                                //getchar();
                             }
                         cout << endl;
                         }
+
+                        /*Seccion que genera el JPEG*/
+
+                            blanco = gdImageColorAllocate(imagen, 255, 255, 255);
+                            negro = gdImageColorAllocate(imagen, 0, 0, 0);
+
+                            // Se pinta el fondo Blanco
+                            gdImageFill(imagen, 0, 0, blanco);
+
+                            // Se imprime el titulo
+                            memset(titulo, 0, 513);
+                            snprintf(titulo, 512, "LAS PETICIONES ENTRE LAS FECHAS INGRESADAS  [%s] a [%s] SE DEFINE", fecha_i, fecha_f);
+                            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.15, 10, (unsigned char *) titulo, negro);
+                            fflush(stdout);
+
+                            // Se enmarcan los valores en un rectangulo
+                            gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, negro);
+                            gdImageLine(imagen, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
+                            gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), negro);
+                            gdImageLine(imagen, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
+
+                            // Se guarda la imagen en un archivo
+                            archivo = fopen("Peticiones_Mes.jpeg", "wb");
+                            if (archivo != NULL)
+                            {
+                                gdImageJpeg(imagen, archivo, 100);
+                                fclose(archivo);
+                            }
+                            else cout<<"\n\n No se pudo crear el archivo jpeg"<<endl;
+
+                            gdImageDestroy(imagen);
+
+                        /*FIN Seccion que genera el JPEG*/
                     }
                 }
 
                 else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
 
-            PQfinish(cnn);
+            PQfinish(conexion);
             /*FIn de la conexion con la base de datos*/
 
          break;
 
          case 't':     //ingresando en opcion "t", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
+            LimpiarConsulta();
 
 
          break;
 
          case 'a':     //ingresando en opcion "a", respaldamos los argumentos.
             Comprobar_Fechas(argv[2], argv[3]);
+            LimpiarConsulta();
+
+            /*Creación de Archivo CSV con las 100 peticiones*/
+            archivoCSV.open ("cien_peticiones.csv");
+            archivoCSV << "IP;FECHA;PETICION;ESTADO;TAMANO;REFERER;USERAGENT";
+
+            /*Conexion con la base de datos*/
+
+            /*Fin de conexion con la base de datos*/
+
+            archivoCSV.close();
+            /*Fin de creación de Archivo CSV con las 100 peticiones*/
 
          break;
 
          case 'v':
-		       integrantes();
+            integrantes();
          break;
 
          };
