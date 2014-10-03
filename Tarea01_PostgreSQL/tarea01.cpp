@@ -86,14 +86,14 @@ fecha_f=Termino;
         fecha_hasta.tm_mday=atoi(chartoint);
 
         //comprobamos si las fechas son reales o correctas.
-        if((fecha_desde.tm_mon>12)||(fecha_desde.tm_mday>31))
+        if((fecha_desde.tm_mon>11)||(fecha_desde.tm_mday>31))
         {
            cout<<"Fecha Inicial Erronea"<<endl;
            exit(0);
            //return EXIT_SUCCESS;
         };
 
-        if((fecha_hasta.tm_mon>12)||(fecha_hasta.tm_mday>31))
+        if((fecha_hasta.tm_mon>11)||(fecha_hasta.tm_mday>31))
         {
            cout<<"Fecha Final Erronea"<<endl;
            exit(0);
