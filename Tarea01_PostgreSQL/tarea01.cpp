@@ -17,10 +17,13 @@
 #define LargoConsulta 200
 #define _TIME_
 #define N 15
-#define IMG_WIDTH 600
-#define IMG_HEIGHT 180
-#define BORDE_ANCHO 580
-#define BORDE_ALTO 150
+
+#define IMG_WIDTH 800
+#define IMG_HEIGHT 600
+#define IMG_BPP 24
+
+#define BORDE_ANCHO 70
+#define BORDE_ALTO 50
 
 /*compilar este archivo con el siguiente código:
 g++ tarea01.cpp -o test -I/usr/include/postgresql -I/usr/include -lpq -lgd  */
@@ -39,6 +42,68 @@ void LimpiarConsulta(void)
     for(int i = 0; i < LargoConsulta; i++ )
         Consulta[i] = '\0';
 }
+
+// FUNCION PARA GENERAR UN NUMERO ALEATORIO
+int aleatoreo() {
+    return rand() % 256;
+}
+
+//FUNCION QUE SE UTILIZA PARA GENERAR UNA ETIQUETA DE MES EN LUGAR DE UN NUMERO SIMPLE
+char* etiquetaMes(int num) {
+
+    char* mes = NULL;
+    mes = (char *) calloc(65, sizeof (char *));
+
+    if (num == 1) {
+        strcpy(mes, "Ene");
+        return mes;
+    } else if (num == 2) {
+        strcpy(mes, "Feb");
+        return mes;
+    } else if (num == 3) {
+        strcpy(mes, "Mar");
+        return mes;
+    } else if (num == 4) {
+        strcpy(mes, "Abr");
+        return mes;
+    } else if (num == 5) {
+        strcpy(mes, "May");
+        return mes;
+    } else if (num == 6) {
+        strcpy(mes, "Jun");
+        return mes;
+    } else if (num == 7) {
+        strcpy(mes, "Jul");
+        return mes;
+    } else if (num == 8) {
+        strcpy(mes, "Ago");
+        return mes;
+    } else if (num == 9) {
+        strcpy(mes, "Sep");
+        return mes;
+    } else if (num == 10) {
+        strcpy(mes, "Oct");
+        return mes;
+    } else if (num == 11) {
+        strcpy(mes, "Nov");
+        return mes;
+    } else if (num == 12) {
+        strcpy(mes, "Dic");
+        return mes;
+    } else {
+        strcpy(mes, "");
+        return mes;
+    }
+}
+
+// Transforma un entero a una Cadena de caracteres
+char* longStr(long num) {
+    char* texto = NULL;
+    texto = (char *) calloc(65, sizeof (char *));
+    snprintf(texto, 64, "%ld", num);
+    return texto;
+}
+
 
 //FUNCION PARA MOSTRAR LOS INTEGRANTES DEL GRUPO
 void integrantes(){
@@ -60,14 +125,12 @@ fecha_f=Termino;
         {
             cout<<"Fecha Inicial Erronea"<<endl;
             exit(0);
-            //return EXIT_SUCCESS;
         };
 
         if((strlen(fecha_f)!=10)||(fecha_f[4]!='-')||(fecha_f[7]!='-'))
         {
             cout<<"Fecha Final Erronea"<<endl;
             exit(0);
-            //return EXIT_SUCCESS;
         };
 
         //respaldamos las fechas divididas en anio, mes y dia de las fechas de inicio y fin.
@@ -90,15 +153,15 @@ fecha_f=Termino;
         {
            cout<<"Fecha Inicial Erronea"<<endl;
            exit(0);
-           //return EXIT_SUCCESS;
         };
 
         if((fecha_hasta.tm_mon>11)||(fecha_hasta.tm_mday>31))
         {
            cout<<"Fecha Final Erronea"<<endl;
            exit(0);
-           //return EXIT_SUCCESS;
         };
+
+        /*Agregar filtro de fecha final mayor a inicial*/
 
 
 cout<<"Fechas Correctamente Validadas"<<endl;
@@ -110,9 +173,10 @@ int main(int argc, char *argv[])
 /*Variables de la funcion principal*/
 char chartoint[5];      			// char para respaldo y apoyo para traspasar las fechas a digitos individuales
 int lineas_totales=0;      			// entero que permite crear el largo total de registro de ventas
-int i=0;                   			// contador
+int i=0, j=0, UltimoMes, PrimerMes, PivoteMes;
 ofstream archivoCSV;                // variable tipo archivo para generar CSV con peticiones
-int CantidadxMes [12];              // Array que almacena la cantidad de peticiones por mes
+// Array que almacena la cantidad de peticiones por mes
+long long int CantidadxMes [12], Mayor = 0;
 
 /*Variables inherentes  a la conexión con la base de datos*/
 PGconn *conexion = NULL;
@@ -123,14 +187,17 @@ const char *esquema = "isw";
 const char *baseDato = "iswdb";
 const char *usuario = "estisw";
 const char *contrasena = "estisw";
+char ResultadoParcial[30];
 
 /*Variables usadas para mostrar datos en JPEG*/
 gdImagePtr imagen;
 FILE *archivo;
 gdFontPtr fuente = gdFontGetSmall();
 imagen = gdImageCreateTrueColor(IMG_WIDTH, IMG_HEIGHT);
-int blanco, negro;
+int blanco, negro, colorAleatorio, alto = 50, ancho = 70;
+long paso = 0, maximo = 0;
 char titulo[513];
+double porcentaje = 0.0;
 
 /*Validación de argumentos de entrada con opciones -g -t -a -v*/
 if((argc==2)||(argc==4))
@@ -143,11 +210,15 @@ if((argc==2)||(argc==4))
 
       switch (argv[1][1]){
 
-         case 'g':     //ingresando en opcion "g", respaldamos los argumentos.
+         case 'g':     //ingresando en opcion "g",
             Comprobar_Fechas(argv[2], argv[3]);
             LimpiarConsulta();
 
-            strcpy(Consulta,"Select fecha,estado From isw.accesos "); //where tamano = 0
+            strcpy(Consulta,"SELECT EXTRACT (month FROM fecha) AS mes, COUNT(peticion) as contador FROM isw.accesos WHERE fecha >= '");
+            strcat(Consulta, argv[2]);
+            strcat(Consulta, " 00:00:00' and fecha <= '");
+            strcat(Consulta, argv[3]);
+            strcat(Consulta, " 23:59:59' GROUP BY EXTRACT (month FROM fecha) ORDER BY EXTRACT (month FROM fecha);");
 
             /*Conexion con la base de datos*/
             conexion = PQsetdbLogin(servidor,puerto,NULL,NULL,baseDato,usuario,contrasena);
@@ -159,19 +230,34 @@ if((argc==2)||(argc==4))
                     {
                         int tuplas = PQntuples(resultado_SQL);
                         int campos = PQnfields(resultado_SQL);
-                        cout << endl << "Las direcciones IP de acceso con tamanio igual a 0 son:" << endl;
 
                         for (i=0; i < tuplas; i++)
                         {
-                            for (int j=0; j < campos; j++)
+                            for (j=0; j < campos; j++)
                             {
-                                cout << PQgetvalue(resultado_SQL,i,j);
-                                cout<<": ";
-                                //getchar();
-                            }
-                        cout << endl;
-                        }
+                                /*se guarda el resultado parcial de una consulta en una variable
+                                temporal, obteniendose el ultimo mes entregado por la consulta y se guarda en un array
+                                el valor de las peticiones por mes*/
 
+                                strcpy(ResultadoParcial, PQgetvalue(resultado_SQL,i,j));
+
+                                if (i == 0 && j == 0)
+                                {
+                                    PrimerMes = atoi(ResultadoParcial);
+                                    PivoteMes = PrimerMes;
+                                }
+                                if (j == 1)
+                                {
+                                    CantidadxMes[PivoteMes] = atoi(ResultadoParcial);
+                                    if (Mayor <= CantidadxMes[PivoteMes]) Mayor = CantidadxMes[PivoteMes];
+                                    PivoteMes++;
+                                }
+                                if (i == tuplas-1 && j == 0) UltimoMes = atoi(ResultadoParcial);
+                                //cout << ResultadoParcial;
+                                //cout<<" | ";
+                            }
+                        //cout << endl;
+                        }
                         /*Seccion que genera el JPEG*/
 
                             blanco = gdImageColorAllocate(imagen, 255, 255, 255);
@@ -182,15 +268,53 @@ if((argc==2)||(argc==4))
 
                             // Se imprime el titulo
                             memset(titulo, 0, 513);
-                            snprintf(titulo, 512, "LAS PETICIONES ENTRE LAS FECHAS INGRESADAS  [%s] a [%s] SE DEFINE", fecha_i, fecha_f);
-                            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.15, 10, (unsigned char *) titulo, negro);
+                            snprintf(titulo, 513, "PETICIONES POR MES ENTRE LAS FECHAS INGRESADAS  [%s] a [%s]", argv[2], argv[3]);
+                            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.35, 90, (unsigned char *) titulo, negro);
                             fflush(stdout);
 
-                            // Se enmarcan los valores en un rectangulo
-                            gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, negro);
+                            // Se coloca la etiqueta al costado del gráfico
+                            for (int y = BORDE_ALTO; y <= (BORDE_ALTO + 500); y = y + 50)
+                            {
+
+                                gdImageString(imagen, fuente, 5, IMG_HEIGHT - y, (unsigned char *) longStr(paso), negro);
+                                paso += (Mayor / 9);
+                            }
+
+                            for (int mes = PrimerMes; mes <= UltimoMes ; mes++)
+                            {
+                                // Se le asigna acada mes un color aleatorio
+                                colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                                porcentaje = ((double) CantidadxMes[mes] / Mayor);
+
+                                // El alto máximo serán 500px que será el 100%
+                                alto = (int) (450 * porcentaje);
+                                // Barra
+                                gdImageFilledRectangle(imagen, ancho, IMG_HEIGHT - BORDE_ALTO, ancho + 55, IMG_HEIGHT - (BORDE_ALTO + alto), colorAleatorio);
+                                // Borde Negro
+                                gdImageRectangle(imagen, ancho, IMG_HEIGHT - BORDE_ALTO, ancho + 55, IMG_HEIGHT - (BORDE_ALTO + alto), negro);
+                                // Etiqueta del Mes
+                                gdImageString(imagen, fuente, ancho + 19, IMG_HEIGHT - BORDE_ALTO + 5, (unsigned char *) etiquetaMes(mes), colorAleatorio);
+                                // Monto
+                                gdImageString(imagen, fuente, ancho + 10, IMG_HEIGHT - (BORDE_ALTO + alto + 20), (unsigned char *) longStr(CantidadxMes[mes]), negro);
+
+                                ancho += 55;
+                            }
+
+                            // Se etiqueta eje horizontal X
+                            memset(titulo, 0, 513);
+                            snprintf(titulo, 513, "MESES (X)");
+                            gdImageString(imagen, fuente, IMG_WIDTH - BORDE_ANCHO, IMG_HEIGHT - BORDE_ALTO + 5, (unsigned char *) titulo, negro);
+                            fflush(stdout);
+
+                             // Se etiqueta eje horizontal Y
+                            memset(titulo, 0, 513);
+                            snprintf(titulo, 513, "PETICIONES (Y)");
+                            gdImageString(imagen, fuente, 8, 23, (unsigned char *) titulo, negro);
+                            fflush(stdout);
+
+                            // Se enmarcan los ejes
                             gdImageLine(imagen, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
                             gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), negro);
-                            gdImageLine(imagen, (IMG_WIDTH - BORDE_ANCHO), BORDE_ALTO, (IMG_WIDTH - BORDE_ANCHO), (IMG_HEIGHT - BORDE_ALTO), negro);
 
                             // Se guarda la imagen en un archivo
                             archivo = fopen("Peticiones_Mes.jpeg", "wb");
@@ -199,9 +323,10 @@ if((argc==2)||(argc==4))
                                 gdImageJpeg(imagen, archivo, 100);
                                 fclose(archivo);
                             }
-                            else cout<<"\n\n No se pudo crear el archivo jpeg"<<endl;
+                            else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
 
                             gdImageDestroy(imagen);
+                            cout<< "Se genero el archivo Peticiones_Mes.jpeg en la carpeta de ejecucion del programa" << endl;
 
                         /*FIN Seccion que genera el JPEG*/
                     }
@@ -214,27 +339,67 @@ if((argc==2)||(argc==4))
 
          break;
 
-         case 't':     //ingresando en opcion "t", respaldamos los argumentos.
+         case 't':     //ingresando en opcion "t"
             Comprobar_Fechas(argv[2], argv[3]);
             LimpiarConsulta();
 
 
          break;
 
-         case 'a':     //ingresando en opcion "a", respaldamos los argumentos.
+         case 'a':     //ingresando en opcion "a"
             Comprobar_Fechas(argv[2], argv[3]);
             LimpiarConsulta();
 
+            strcpy(Consulta,"SELECT peticion, COUNT (*) as contador FROM isw.accesos WHERE fecha >= '");
+            strcat(Consulta, argv[2]);
+            strcat(Consulta, " 00:00:00' and fecha <= '");
+            strcat(Consulta, argv[3]);
+            strcat(Consulta, " 23:59:59' GROUP BY peticion ORDER BY contador DESC limit 100;");
+
             /*Creación de Archivo CSV con las 100 peticiones*/
             archivoCSV.open ("cien_peticiones.csv");
-            archivoCSV << "IP;FECHA;PETICION;ESTADO;TAMANO;REFERER;USERAGENT";
+            archivoCSV << "RANKING;PETICION;TOTAL OCURRENCIAS\n";
+            //archivoCSV.close();
 
             /*Conexion con la base de datos*/
+            conexion = PQsetdbLogin(servidor,puerto,NULL,NULL,baseDato,usuario,contrasena);
 
+                if (PQstatus(conexion) != CONNECTION_BAD) {
+                resultado_SQL = PQexec(conexion, Consulta);
+
+                    if (resultado_SQL != NULL)
+                    {
+
+
+
+                        int ID = 1;
+                        int tuplas = PQntuples(resultado_SQL);
+                        int campos = PQnfields(resultado_SQL);
+
+                        for (i=0; i < tuplas; i++)
+                        {
+                            archivoCSV << ID << ";";
+                            for (j=0; j < campos; j++)
+                            {
+                                /*Falta corregir problema de los punto y coma en las peticiones*/
+
+                                /*Segmento que genera la tupla a ingresar al csv */
+                                archivoCSV << PQgetvalue(resultado_SQL,i,j) << ";";
+
+                            }
+                            archivoCSV << "\n";
+                            ID++;
+                        }
+                        /*Fin de creación de Archivo CSV con las 100 peticiones*/
+                        archivoCSV.close();
+                    }
+                }
+                else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
+
+            PQfinish(conexion);
             /*Fin de conexion con la base de datos*/
 
-            archivoCSV.close();
-            /*Fin de creación de Archivo CSV con las 100 peticiones*/
+
 
          break;
 
