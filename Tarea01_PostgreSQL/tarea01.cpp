@@ -106,7 +106,7 @@ char* longStr(long num) {
 void integrantes(){
      printf("\nIntegrantes:\n\nGutierrez, Daniel\nLeiva, Daniel\nRojas, Ernesto\n\n");
      printf("Version: 1.3\n");
-     printf("Fecha de compilacion: %s - %s\n\n ", __DATE__, __TIME__);//Fecha de compilacion.
+     printf("Fecha de compilacion: %s - %s\n\n", __DATE__, __TIME__);//Fecha de compilacion.
 
 }
 
