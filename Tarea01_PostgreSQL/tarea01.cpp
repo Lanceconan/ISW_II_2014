@@ -3,7 +3,6 @@
 #include <cstring>
 #include <stdio.h>
 #include <time.h>
-#include <math.h>
 #include <cstdlib>
 #include <libpq-fe.h>
 #include <fstream>
@@ -192,7 +191,7 @@ gdImagePtr imagen;
 FILE *archivo;
 gdFontPtr fuente = gdFontGetSmall();
 imagen = gdImageCreateTrueColor(IMG_WIDTH, IMG_HEIGHT);
-int blanco, negro, colorAleatorio, alto = 50, ancho = 70;
+int blanco, negro, colorAleatorio, alto = 50, ancho = 70, ValorGrafico, CantidadGraficada = 0;
 long paso = 0, maximo = 0;
 char titulo[513];
 double porcentaje = 0.0, PorcentajeParcial = 0.0;
@@ -251,10 +250,7 @@ if((argc==2)||(argc==4))
                                     PivoteMes++;
                                 }
                                 if (i == tuplas-1 && j == 0) UltimoMes = atoi(ResultadoParcial);
-                                //cout << ResultadoParcial;
-                                //cout<<" | ";
                             }
-                        //cout << endl;
                         }
                         /*Seccion que genera el JPEG*/
 
@@ -361,7 +357,7 @@ if((argc==2)||(argc==4))
             // Se imprime el titulo
             memset(titulo, 0, 513);
             snprintf(titulo, 513, "PETICIONES POR ESTADO ENTRE LAS FECHAS INGRESADAS  [%s] a [%s]", argv[2], argv[3]);
-            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.25, 10, (unsigned char *) titulo, negro);
+            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.1, 10, (unsigned char *) titulo, negro);
             fflush(stdout);
 
                 if (PQstatus(conexion) != CONNECTION_BAD) {
@@ -378,28 +374,78 @@ if((argc==2)||(argc==4))
                                 if (j == 1) CantidadPeticiones = CantidadPeticiones + atoi(PQgetvalue(resultado_SQL,i,j));
 
                         // Se obtienen los porcentajes y dibujar graficos
+                        int ValorAnterior = 0;
+                        int pasoLineaColores = 385;
                         for (i=0; i < tuplas; i++)
                         {
                             for (j=0; j < campos; j++)
                             {
-                                cout << PQgetvalue(resultado_SQL,i,j);
-                                cout << " | ";
                                 if (j == 1)
                                 {
-                                    PorcentajeParcial = ((double)atoi(PQgetvalue(resultado_SQL,i,j))/CantidadPeticiones)*100;
-                                    cout << " | " << PorcentajeParcial;
+                                    PorcentajeParcial = ((double)atoi(PQgetvalue(resultado_SQL,i,j))/CantidadPeticiones);
+                                    ValorGrafico = (PorcentajeParcial) * 360;
 
-                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
-                        gdImageFilledArc(imagen, 250, 300, 400, 400, 0, 90, colorAleatorio, gdPie);
-                        /*
-                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
-                        gdImageFilledArc(imagen, 250, 300, 400, 400, 45, 75, colorAleatorio, gdPie);
-                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
-                        gdImageFilledArc(imagen, 250, 300, 400, 400, 75, 360, colorAleatorio, gdPie);*/
+                                    /*Se grafican de manera individual cada una de las peticiones por mes que son
+                                    apreciables, aplicando el filtro que al menos debe tener el valor 1 en la conversion
+                                    proporcional del porcentaje de peticiones y el grafico de torta (360 grados) */
+                                    if (ValorGrafico >= 1)
+                                    {
+
+                                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                                        gdImageFilledArc(imagen, 220, 300, 400, 400, ValorAnterior, ValorGrafico + ValorAnterior, colorAleatorio, gdPie);
+                                        gdImageFilledArc(imagen, 570, pasoLineaColores, 10, 10, 0, 360, colorAleatorio, gdPie);
+                                        ValorAnterior = ValorGrafico + ValorAnterior;
+                                        pasoLineaColores = pasoLineaColores + 30;
+                                        CantidadGraficada++;
+                                    }
                                 }
                             }
-                            cout << endl;
                         }
+
+                        /* Se completa el grafico con otras peticiones que son despreciables graficamente hablando*/
+                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                        gdImageFilledArc(imagen, 220, 300, 400, 400, ValorAnterior, 360, colorAleatorio, gdPie);
+                        //pasoLineaColores = pasoLineaColores + 30;
+                        gdImageFilledArc(imagen, 570, pasoLineaColores, 10, 10, 0, 360, colorAleatorio, gdPie);
+
+                        /*Normalizar el gráfico*/
+
+                        // Se etiqueta un subtitulo
+                        int pasoLinea = 50;
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 513, "De un total de [%llu] Peticiones", CantidadPeticiones);
+                        gdImageString(imagen, fuente, 470, pasoLinea , (unsigned char *) titulo, negro);
+                        fflush(stdout);
+                        pasoLinea = pasoLinea + 20;
+
+                        for (i=0; i < tuplas; i++)
+                        {
+                            // Se publican los porcentajes
+                            pasoLinea = pasoLinea + 13;
+                            memset(titulo, 0, 513);
+                            snprintf(titulo, 513, "Peticion [%s] tuvo un Porcentaje de: [%f]", PQgetvalue(resultado_SQL,i,0), (atof(PQgetvalue(resultado_SQL,i,1))/CantidadPeticiones)*100);
+                            gdImageString(imagen, fuente, 470, pasoLinea, (unsigned char *) titulo, negro);
+                            fflush(stdout);
+                        }
+
+                        // Se indexa el grafico para su interpretacion
+                        pasoLinea = 380 ;
+                        for (i=0; i < CantidadGraficada; i++)
+                        {
+                            // Se publican los porcentajes
+                            memset(titulo, 0, 513);
+                            snprintf(titulo, 513, "Peticion [%s]", PQgetvalue(resultado_SQL,i,0));
+                            gdImageString(imagen, fuente, 600, pasoLinea, (unsigned char *) titulo, negro);
+                            fflush(stdout);
+                            pasoLinea = pasoLinea + 30;
+                        }
+
+                        // Otros Porcentajes
+                        memset(titulo, 0, 513);
+                        snprintf(titulo, 513, "Otras Peticiones");
+                        gdImageString(imagen, fuente, 600, pasoLinea, (unsigned char *) titulo, negro);
+                        fflush(stdout);
+
 
                         // Se guarda la imagen en un archivo
                         archivo = fopen("Peticiones_Estado.jpeg", "wb");
