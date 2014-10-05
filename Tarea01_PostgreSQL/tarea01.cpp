@@ -1,5 +1,4 @@
-/*Bibliotecas utilizadas*/ // Las fechas en la BD  van desde el 16/03 hasta 23/09 del 2014 todas
-
+/*Bibliotecas utilizadas*/
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
@@ -11,7 +10,6 @@
 #include <string.h>
 #include <gd.h>
 #include <gdfonts.h>
-
 
 /*Constantes*/
 #define LargoConsulta 200
@@ -176,7 +174,7 @@ int lineas_totales=0;      			// entero que permite crear el largo total de regi
 int i=0, j=0, UltimoMes, PrimerMes, PivoteMes;
 ofstream archivoCSV;                // variable tipo archivo para generar CSV con peticiones
 // Array que almacena la cantidad de peticiones por mes
-long long int CantidadxMes [12], Mayor = 0;
+long long int CantidadxMes [12], Mayor = 0, CantidadPeticiones = 0;
 
 /*Variables inherentes  a la conexión con la base de datos*/
 PGconn *conexion = NULL;
@@ -197,7 +195,7 @@ imagen = gdImageCreateTrueColor(IMG_WIDTH, IMG_HEIGHT);
 int blanco, negro, colorAleatorio, alto = 50, ancho = 70;
 long paso = 0, maximo = 0;
 char titulo[513];
-double porcentaje = 0.0;
+double porcentaje = 0.0, PorcentajeParcial = 0.0;
 
 /*Validación de argumentos de entrada con opciones -g -t -a -v*/
 if((argc==2)||(argc==4))
@@ -343,6 +341,84 @@ if((argc==2)||(argc==4))
             Comprobar_Fechas(argv[2], argv[3]);
             LimpiarConsulta();
 
+            strcpy(Consulta,"SELECT estado as estado, COUNT(peticion) AS contador FROM isw.accesos WHERE fecha >= '");
+            strcat(Consulta, argv[2]);
+            strcat(Consulta, " 00:00:00' and fecha <= '");
+            strcat(Consulta, argv[3]);
+            strcat(Consulta, " 23:59:59' GROUP BY estado ORDER BY contador DESC");
+
+            /*Conexion con la base de datos*/
+            conexion = PQsetdbLogin(servidor,puerto,NULL,NULL,baseDato,usuario,contrasena);
+
+            /*Seccion que genera el JPEG*/
+
+            blanco = gdImageColorAllocate(imagen, 255, 255, 255);
+            negro = gdImageColorAllocate(imagen, 0, 0, 0);
+
+            // Se pinta el fondo Blanco
+            gdImageFill(imagen, 0, 0, blanco);
+
+            // Se imprime el titulo
+            memset(titulo, 0, 513);
+            snprintf(titulo, 513, "PETICIONES POR ESTADO ENTRE LAS FECHAS INGRESADAS  [%s] a [%s]", argv[2], argv[3]);
+            gdImageString(imagen, fuente, (int) IMG_WIDTH * 0.25, 10, (unsigned char *) titulo, negro);
+            fflush(stdout);
+
+                if (PQstatus(conexion) != CONNECTION_BAD) {
+                resultado_SQL = PQexec(conexion, Consulta);
+
+                    if (resultado_SQL != NULL)
+                    {
+
+                        int tuplas = PQntuples(resultado_SQL);
+                        int campos = PQnfields(resultado_SQL);
+                        // Primero obtener la cantidad total de peticiones y normalizar el gráfico
+                        for (i=0; i < tuplas; i++)
+                            for (j=0; j < campos; j++)
+                                if (j == 1) CantidadPeticiones = CantidadPeticiones + atoi(PQgetvalue(resultado_SQL,i,j));
+
+                        // Se obtienen los porcentajes y dibujar graficos
+                        for (i=0; i < tuplas; i++)
+                        {
+                            for (j=0; j < campos; j++)
+                            {
+                                cout << PQgetvalue(resultado_SQL,i,j);
+                                cout << " | ";
+                                if (j == 1)
+                                {
+                                    PorcentajeParcial = ((double)atoi(PQgetvalue(resultado_SQL,i,j))/CantidadPeticiones)*100;
+                                    cout << " | " << PorcentajeParcial;
+
+                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                        gdImageFilledArc(imagen, 250, 300, 400, 400, 0, 90, colorAleatorio, gdPie);
+                        /*
+                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                        gdImageFilledArc(imagen, 250, 300, 400, 400, 45, 75, colorAleatorio, gdPie);
+                        colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
+                        gdImageFilledArc(imagen, 250, 300, 400, 400, 75, 360, colorAleatorio, gdPie);*/
+                                }
+                            }
+                            cout << endl;
+                        }
+
+                        // Se guarda la imagen en un archivo
+                        archivo = fopen("Peticiones_Estado.jpeg", "wb");
+                        if (archivo != NULL)
+                        {
+                           gdImageJpeg(imagen, archivo, 100);
+                           fclose(archivo);
+                        }
+                        else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
+
+                        gdImageDestroy(imagen);
+                        cout<< "Se genero el archivo Peticiones_Estado.jpeg en la carpeta de ejecucion del programa" << endl;
+
+                        /*FIN Seccion que genera el JPEG*/
+                    }
+                }
+                else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
+            PQfinish(conexion);
+            /*Fin de conexion con la base de datos*/
 
          break;
 
@@ -369,9 +445,6 @@ if((argc==2)||(argc==4))
 
                     if (resultado_SQL != NULL)
                     {
-
-
-
                         int ID = 1;
                         int tuplas = PQntuples(resultado_SQL);
                         int campos = PQnfields(resultado_SQL);
@@ -398,9 +471,6 @@ if((argc==2)||(argc==4))
 
             PQfinish(conexion);
             /*Fin de conexion con la base de datos*/
-
-
-
          break;
 
          case 'v':
