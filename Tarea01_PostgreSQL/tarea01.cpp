@@ -409,7 +409,6 @@ if((argc==2)||(argc==4))
                         /* Se completa el grafico con otras peticiones que son despreciables graficamente hablando*/
                         colorAleatorio = gdImageColorAllocate(imagen, aleatoreo(), aleatoreo(), aleatoreo());
                         gdImageFilledArc(imagen, 220, 300, 400, 400, ValorAnterior, 360, colorAleatorio, gdPie);
-                        //pasoLineaColores = pasoLineaColores + 30;
                         gdImageFilledArc(imagen, 570, pasoLineaColores, 10, 10, 0, 360, colorAleatorio, gdPie);
 
                         /*Normalizar el gráfico*/
