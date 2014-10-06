@@ -158,10 +158,14 @@ fecha_f=Termino;
            exit(0);
         };
 
-        /*Agregar filtro de fecha final mayor a inicial*/
+        if((fecha_hasta.tm_mon < fecha_desde.tm_mon)||(fecha_hasta.tm_mday < fecha_desde.tm_mday) || (fecha_hasta.tm_year < fecha_desde.tm_year) )
+        {
+           cout<<"Fecha Final es Menor a la Fecha Inicial"<<endl;
+           exit(0);
+        };
 
 
-cout<<"Fechas Correctamente Validadas"<<endl;
+cout<<"\nNOTA: Si el archivo generado está en blanco, se debe a que las fechas tecleadas no existen en el calendario o no existen registros para las fechas en la Base de Datos\n"<<endl;
 }
 
 /*Funcion principal y cuerpo del programa*/
@@ -320,7 +324,7 @@ if((argc==2)||(argc==4))
                             else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
 
                             gdImageDestroy(imagen);
-                            cout<< "Se genero el archivo Peticiones_Mes.jpg en la carpeta de ejecucion del programa" << endl;
+                            cout<< "Se genero el archivo Peticiones_Mes.jpg en la carpeta de ejecucion del programa\n" << endl;
 
                         /*FIN Seccion que genera el JPEG*/
                     }
@@ -457,11 +461,11 @@ if((argc==2)||(argc==4))
                         else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
 
                         gdImageDestroy(imagen);
-                        cout<< "Se genero el archivo Peticiones_Estado.jpg en la carpeta de ejecucion del programa" << endl;
+                        cout<< "Se genero el archivo Peticiones_Estado.jpg en la carpeta de ejecucion del programa\n" << endl;
                         /*FIN Seccion que genera el JPEG*/
                     }
                 }
-                else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
+                else cout<<"Hubo un error en la conexion a la base de datos\n"<<endl;
             PQfinish(conexion);
             /*Fin de conexion con la base de datos*/
 
@@ -478,7 +482,7 @@ if((argc==2)||(argc==4))
             strcat(Consulta, " 23:59:59' GROUP BY peticion ORDER BY contador DESC limit 100;");
 
             /*Creación de Archivo CSV con las 100 peticiones*/
-            archivoCSV.open ("cien_peticiones.csv");
+            archivoCSV.open ("Cien_Peticiones.csv");
             archivoCSV << "RANKING;PETICION;TOTAL OCURRENCIAS\n";
             //archivoCSV.close();
 
@@ -512,10 +516,11 @@ if((argc==2)||(argc==4))
                         archivoCSV.close();
                     }
                 }
-                else cout<<"Hubo un error en la conexion a la base de datos"<<endl;
-
+                else cout<<"Hubo un error en la conexion a la base de datos\n"<<endl;
+            cout<<"Se creo el archivo Cien_Peticiones.csv en la carpeta de ejecucion del programa\n"<<endl;
             PQfinish(conexion);
             /*Fin de conexion con la base de datos*/
+
          break;
 
          case 'v':
