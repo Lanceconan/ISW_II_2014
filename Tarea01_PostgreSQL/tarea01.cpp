@@ -311,7 +311,7 @@ if((argc==2)||(argc==4))
                             gdImageLine(imagen, BORDE_ANCHO, BORDE_ALTO, BORDE_ANCHO, (IMG_HEIGHT - BORDE_ALTO), negro);
 
                             // Se guarda la imagen en un archivo
-                            archivo = fopen("Peticiones_Mes.jpeg", "wb");
+                            archivo = fopen("Peticiones_Mes.jpg", "wb");
                             if (archivo != NULL)
                             {
                                 gdImageJpeg(imagen, archivo, 100);
@@ -320,7 +320,7 @@ if((argc==2)||(argc==4))
                             else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
 
                             gdImageDestroy(imagen);
-                            cout<< "Se genero el archivo Peticiones_Mes.jpeg en la carpeta de ejecucion del programa" << endl;
+                            cout<< "Se genero el archivo Peticiones_Mes.jpg en la carpeta de ejecucion del programa" << endl;
 
                         /*FIN Seccion que genera el JPEG*/
                     }
@@ -448,7 +448,7 @@ if((argc==2)||(argc==4))
 
 
                         // Se guarda la imagen en un archivo
-                        archivo = fopen("Peticiones_Estado.jpeg", "wb");
+                        archivo = fopen("Peticiones_Estado.jpg", "wb");
                         if (archivo != NULL)
                         {
                            gdImageJpeg(imagen, archivo, 100);
@@ -457,8 +457,7 @@ if((argc==2)||(argc==4))
                         else cout<<"\n\n No se pudo crear el archivo jpeg\nPor favor ejecute nuevamente"<<endl;
 
                         gdImageDestroy(imagen);
-                        cout<< "Se genero el archivo Peticiones_Estado.jpeg en la carpeta de ejecucion del programa" << endl;
-
+                        cout<< "Se genero el archivo Peticiones_Estado.jpg en la carpeta de ejecucion del programa" << endl;
                         /*FIN Seccion que genera el JPEG*/
                     }
                 }
