@@ -1,0 +1,15 @@
+¿En que consiste el algoritmo?
+
+Simple, se dividio justo en dos el texto en la palabra "sapes" [Fila 12 - Columna 4] justo en la última 's' ya que era el medio del texto.
+Luego se comenzo a intercalar caracter por caracter de cada una de las dos partes. Solamente ese.
+
+El programa en C++, lo unico que hace es leer las partes por separado e ir ingresando en un archivo SalidaTexto.txt
+un caracter de la parte Uno (p1.txt) seguido de un caracter de la parte Dos (p2.txt). Ambos archivos previamente configurados.
+
+Nota:
+* El texto de salida no era totalmente fidedigno, por lo que se comenzo a jugar con los espacios en blanco, reemplazandolos por guiones bajos '_'
+y de esa forma la salida era mucho mas clara.
+
+* El programa solo fue utilizado para tener una referencia, ya que el decifrado fue a mano.
+
+Costo un monton dar con la solución
