@@ -1,0 +1,23 @@
+<?php $__env->startSection('inicio_vista'); ?>
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Inicio
+        </h1>
+        <ol class="breadcrumb">
+            <li>
+                <i class="fa fa-dashboard"></i>  <a href="./">Inicio</a>
+            </li>
+            <li class="active">
+                <i class="fa fa-info"></i> Introduccion.
+            </li>
+        </ol>
+    </div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('mostrar'); ?>
+    <div class="col-lg-12">
+        <h5 class="lead">Trabajo de Ayudantia de la asignatura Ingenieria de Software.<br>
+            Desarrollo del proyecto mediante el Framework Laravel.</h5>
+    </div>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
