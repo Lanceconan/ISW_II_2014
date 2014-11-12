@@ -11,9 +11,11 @@
 |
 */
 
+
+
 Route::get('/asd', function()
 {
-	return View::make('hello');
+        return View::make('hello');
 });
 
 Route::get('/', 'PaisesController@showHome');
@@ -24,3 +26,5 @@ Route::post('/crear','PaisesController@createPais');
 Route::post('/eliminar','PaisesController@deletePais');
 Route::get('/editar{id}','PaisesController@editPais');
 Route::post('/guardarcambio','PaisesController@changePais');
+
+

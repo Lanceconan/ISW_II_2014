@@ -18,6 +18,9 @@
 
 @section('mostrar')
     <div>
+        @if(Session::has('mensaje'))
+        <p style="color: greenyellow"><strong>{{Session::get('mensaje')}}</strong></p>
+        @endif
         <!--<h2>Paises.</h2>-->
         <div class="table-responsive">
             <table class="table table-hover table-striped">

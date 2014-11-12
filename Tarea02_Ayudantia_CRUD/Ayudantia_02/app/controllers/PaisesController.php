@@ -57,10 +57,10 @@ class PaisesController extends BaseController {
         
         $pais = Paises::find($input["id"]);
         if(is_null($pais)){
-            return Redirect::to('../');
+            return Redirect::to('./');
         }else{
             $pais->delete();
-            return Redirect::to('./detalles');
+            return Redirect::to('./detalles')->with('mensaje','El registro ha sido eliminado exitosamente.');
         }
     }
     
@@ -104,7 +104,7 @@ class PaisesController extends BaseController {
             $pais->save();
             
             Session::flash('mensaje', 'El registro ha sido ingresado exitosamente');
-            return Redirect::to('./listar'); 
+            return Redirect::to('./listar')->with('mensaje','El registro ha sido modificado exitosamente.'); 
         }  
     }
 }

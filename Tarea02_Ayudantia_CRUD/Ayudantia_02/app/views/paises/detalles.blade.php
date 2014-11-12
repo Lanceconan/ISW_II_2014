@@ -18,6 +18,9 @@
 
 @section('mostrar')
     <div>
+        @if(Session::has('mensaje'))
+        <p style="color: red"><strong>{{Session::get('mensaje')}}</strong></p>
+        @endif
         <!--<h2>Paises.</h2>-->
         <div class="table-responsive">
             <table class="table table-hover table-striped">                
@@ -36,9 +39,9 @@
                     <form>
                     <tr>
                         <td><input id="id" name="id" class="form-control" readonly="true" value="{{$pais->id}}" ></td>
-                        <td><input id="nombre" name="nombre" class="form-control" value="{{$pais->Nombre}}" onkeypress="return validatext(event,'1')"></td>
-                        <td><input id="capital" name="capital" class="form-control" value="{{$pais->Capital}}" onkeypress="return validatext(event,'1')"></td>
-                        <td><input id="habitaciones" name="habitantes" class="form-control" value="{{$pais->Habitantes}}" onkeypress="return validatext(event,'2')"></td>
+                        <td><input id="nombre" name="nombre" class="form-control" readonly="true" value="{{$pais->Nombre}}" onkeypress="return validatext(event,'1')"></td>
+                        <td><input id="capital" name="capital" class="form-control" readonly="true" value="{{$pais->Capital}}" onkeypress="return validatext(event,'1')"></td>
+                        <td><input id="habitaciones" name="habitantes" class="form-control" readonly="true" value="{{$pais->Habitantes}}" onkeypress="return validatext(event,'2')"></td>
                         <td><button type="submit" class="btn btn-default" formaction="./editar{{$pais->id}}" >Modificar Datos</button></td>
                         <td><button type="submit" class="btn btn-default" formmethod="post" formaction="./eliminar">Eliminar Dato</button></td>
                     </tr>
